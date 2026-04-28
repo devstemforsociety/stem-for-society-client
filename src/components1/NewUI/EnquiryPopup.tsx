@@ -289,6 +289,9 @@ const EnquiryPopup = ({ isOpen, onClose, mode, preSelectedService }: EnquiryPopu
 
   // ========== VALIDATION ==========
   const validateForm = (): boolean => {
+    const isSingleThemeSubmission =
+      mode === "institution" && formData.serviceInterest === "single-theme";
+
     const requiredFields = mode === "individual" 
       ? ["fullName", "contactNumber", "email", "serviceInterest"]
       : ["designation", "instituteOrOrganization", "contactNumber", "email", "serviceInterest"];
@@ -308,10 +311,21 @@ const EnquiryPopup = ({ isOpen, onClose, mode, preSelectedService }: EnquiryPopu
       return false;
     }
 
-    // Phone validation
-    const phoneRegex = /^[+]?[\d\s-]{10,}$/;
-    if (!phoneRegex.test(formData.contactNumber)) {
-      toast.error("Please enter a valid contact number (minimum 10 digits)");
+    // Mobile validation: exactly 10 digits
+    const normalizedPhone = formData.contactNumber.replace(/\D/g, "");
+    if (normalizedPhone.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return false;
+    }
+
+    // Date and time are mandatory for scheduled submissions
+    if (!isSingleThemeSubmission && !formData.preferredDate) {
+      toast.error("Please select a preferred date");
+      return false;
+    }
+
+    if (!isSingleThemeSubmission && !formData.selectedTime) {
+      toast.error("Please select a preferred time");
       return false;
     }
 
