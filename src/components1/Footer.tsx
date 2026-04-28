@@ -37,12 +37,12 @@ const Footer = () => {
                 </li>
                 <li>
                   <a href="/mental-wellbeing" className="hover:text-white">
-                    Mental Wellbeing
+                    Individual
                   </a>
                 </li>
                 <li>
                   <a href="/career-counselling" className="hover:text-white">
-                    Career Counselling
+                    Intitute
                   </a>
                 </li>
               </ul>
@@ -85,7 +85,7 @@ const Footer = () => {
                 </li>
               </ul>
             </div>
-            <div>
+            {/* <div>
               <h4 className="font-semibold mb-2">QUICK LINKS</h4>
               <ul className="space-y-1 text-blue-100">
                 <li>
@@ -99,7 +99,7 @@ const Footer = () => {
                   </a>
                 </li>
               </ul>
-            </div>
+            </div> */}
           </div>
 
           {/* Newsletter */}
