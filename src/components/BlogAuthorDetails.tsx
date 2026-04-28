@@ -4,7 +4,6 @@ import bg from "../assets/bg.webp";
 import { queryClient } from "../lib/api";
 import { useBlogStepper } from "../lib/hooks";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 
 export const OverlayedImage: React.FC = () => {
   return (
@@ -51,7 +50,7 @@ function BlogAuthorDetails() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (
       !formData.name.trim() ||
@@ -60,6 +59,7 @@ function BlogAuthorDetails() {
       !formData.linkedInProfileUrl.trim() ||
       !formData.designation.trim()
     ) {
+      const { toast } = await import("react-toastify");
       toast.error("Please fill all required fields");
       return;
     }
