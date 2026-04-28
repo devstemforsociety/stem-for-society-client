@@ -42,7 +42,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a href="/career-counselling" className="hover:text-white">
-                    Intitute
+                    Institutional
                   </a>
                 </li>
               </ul>
