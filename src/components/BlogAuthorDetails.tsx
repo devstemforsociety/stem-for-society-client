@@ -4,6 +4,7 @@ import bg from "../assets/bg.webp";
 import { queryClient } from "../lib/api";
 import { useBlogStepper } from "../lib/hooks";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 export const OverlayedImage: React.FC = () => {
   return (
