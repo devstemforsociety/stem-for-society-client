@@ -90,7 +90,7 @@ function BlogDetails() {
   return (
     <div className="flex flex-row h-full w-full shadow-md">
       <form
-        className="flex-1 flex items-center flex-col p-4 w-full gap-5"
+        className="flex-1 flex items-center flex-col p-4 w-full gap-5 mx-auto"
         onSubmit={handleSubmit}
       >
         <Title order={4}>Blog Details</Title>
@@ -142,9 +142,6 @@ function BlogDetails() {
           Submit
         </Button>
       </form>
-      <div className="flex-1 h-full hidden md:block">
-        <OverlayedImage />
-      </div>
     </div>
   );
 }

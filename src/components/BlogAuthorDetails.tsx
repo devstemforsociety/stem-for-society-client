@@ -52,7 +52,16 @@ function BlogAuthorDetails() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    if (
+      !formData.name.trim() ||
+      !formData.phoneNumber.trim() ||
+      !formData.emailAddress.trim() ||
+      !formData.linkedInProfileUrl.trim() ||
+      !formData.designation.trim()
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
     queryClient.setQueryData(["blog", "authorDetails"], formData);
     setActive(1);
   };
@@ -60,7 +69,7 @@ function BlogAuthorDetails() {
   return (
     <div className="flex flex-row h-full w-full p-6 gap-5 shadow-md">
       <form
-        className="flex-1 flex items-center justify-center flex-col w-full gap-5"
+        className="flex-1 flex items-center justify-center flex-col w-full gap-5 mx-auto"
         onSubmit={handleSubmit}
       >
         <Title order={4}>Author Details</Title>
@@ -130,9 +139,6 @@ function BlogAuthorDetails() {
           Next
         </Button>
       </form>
-      <div className="flex-1 h-full hidden md:block">
-        <OverlayedImage />
-      </div>
     </div>
   );
 }

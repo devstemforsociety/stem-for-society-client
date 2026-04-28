@@ -157,8 +157,7 @@ const BlogCreateContent = () => {
   const steps = [
     { number: 1, title: 'Author Information', active: currentStep === 1 },
     { number: 2, title: 'Article Content', active: currentStep === 2 },
-    { number: 3, title: 'Preview & Upload', active: currentStep === 3 },
-    { number: 4, title: 'Final Review', active: currentStep === 4 }
+    { number: 3, title: 'Preview & Upload', active: currentStep === 3 }
   ];
 
   const handleInputChange = (field: string, value: string | File | null | string[]) => {
@@ -174,9 +173,36 @@ const BlogCreateContent = () => {
 
   const handleContinue = () => {
     if (currentStep === 1) {
-      // Validate author details - removed fieldExperience from validation as it's not in AuthorDetails type
-      if (!formData.name || !formData.phoneNumber || !formData.emailAddress || !formData.linkedInProfileUrl || !formData.designation) {
+      // Validate author details
+      if (
+        !formData.name || 
+        !formData.phoneNumber || 
+        !formData.emailAddress || 
+        !formData.linkedInProfileUrl || 
+        !formData.designation ||
+        !formData.educationLevel ||
+        !formData.department ||
+        !formData.fieldExperience
+      ) {
         toast.error("Please fill all required fields");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) {
+        toast.error("AuthorEmail: Invalid email");
+        return;
+      }
+      if (formData.phoneNumber.replace(/\D/g, '').length < 10) {
+        toast.error("AuthorMobile: Mobile number is invalid");
+        return;
+      }
+      try {
+        const url = new URL(formData.linkedInProfileUrl);
+        if (!url.hostname.includes("linkedin.com")) {
+          toast.error("AuthorLinkedin: Only valid linkedin links are allowed");
+          return;
+        }
+      } catch (e) {
+        toast.error("AuthorLinkedin: Invalid URI");
         return;
       }
       
@@ -395,86 +421,68 @@ const BlogCreateContent = () => {
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-gray-100 rounded-lg p-8 h-80 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-4">📄</div>
-                  <p className="font-medium">{formData.title || 'Article Preview'}</p>
-                  <p className="text-sm mt-2">By {formData.name}</p>
-                  {formData.content && (
-                    <div className="text-xs mt-2 text-gray-400 line-clamp-3">
-                      <div dangerouslySetInnerHTML={{ __html: formData.content.substring(0, 200) + '...' }} />
-                    </div>
-                  )}
-                </div>
-              </div>
+          <div className="space-y-6 max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h3 className="text-xl font-semibold mb-2">Upload Cover Image</h3>
+              <p className="text-gray-600">Choose an eye-catching cover photo for your article.</p>
+            </div>
 
-              <div className="space-y-6">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-                  <div className="mb-4">
-                    <div className="w-16 h-16 mx-auto bg-gray-200 rounded-lg flex items-center justify-center mb-4">
-                      <Upload className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-600 mb-2">
-                      {formData.coverPhoto ? formData.coverPhoto.name : 'Drag and Drop the Cover photo'}
-                    </p>
+            <div className="space-y-6">
+              <label 
+                htmlFor="cover-upload" 
+                className="block border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-lg p-10 text-center bg-gray-50 cursor-pointer transition-colors"
+              >
+                <div className="mb-4 pointer-events-none">
+                  <div className="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                    <Upload className="w-8 h-8 text-gray-500" />
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="cover-upload"
+                  <p className="text-gray-700 font-medium text-lg mb-1">
+                    {formData.coverPhoto ? formData.coverPhoto.name : 'Click or drag image to upload'}
+                  </p>
+                  <p className="text-gray-500 text-sm">SVG, PNG, JPG or GIF (max. 5MB)</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="cover-upload"
+                />
+              </label>
+
+              {formData.coverPhoto && (
+                <div className="text-center">
+                  <img
+                    src={URL.createObjectURL(formData.coverPhoto)}
+                    alt="Cover Preview"
+                    className="w-full h-64 object-cover rounded-lg shadow-sm"
                   />
-                  <label htmlFor="cover-upload" className="cursor-pointer">
-                    <Button variant="outline" className="bg-blue-600 text-white hover:bg-blue-700 border-0">
-                      Choose File
-                    </Button>
-                  </label>
-                </div>
-
-                {formData.coverPhoto && (
-                  <div className="text-center">
-                    <img
-                      src={URL.createObjectURL(formData.coverPhoto)}
-                      alt="Cover Preview"
-                      className="w-full h-40 object-cover rounded-lg"
-                    />
-                  </div>
-                )}
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start space-x-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm">
-                    <p className="text-yellow-800 font-medium">Do not upload any copyrighted images,</p>
-                    <p className="text-yellow-700">as they will be taken down due to legal repercussions.</p>
-                  </div>
-                </div>
-
-                <div className="flex space-x-4">
                   <Button 
                     variant="outline" 
-                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700 border-0"
-                    onClick={() => document.getElementById('cover-upload')?.click()}
+                    className="mt-4 text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleInputChange('coverPhoto', null);
+                    }}
                   >
-                    Update Cover
+                    Remove Image
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => handleInputChange('coverPhoto', null)}
-                  >
-                    Re-Upload
-                  </Button>
+                </div>
+              )}
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start space-x-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="text-yellow-800 font-medium">Copyright Notice</p>
+                  <p className="text-yellow-700">Do not upload any copyrighted images, as they will be taken down due to legal repercussions.</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center space-x-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-              <p className="text-sm text-yellow-800">
-                Your article will be reviewed and published within 48 hours.
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center space-x-3 mt-6">
+              <span className="text-2xl">ℹ️</span>
+              <p className="text-sm text-blue-800">
+                Your article will be reviewed and published within 48 hours after submission.
               </p>
             </div>
           </div>

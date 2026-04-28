@@ -16,7 +16,7 @@ const BlogStepper: React.FC<BlogStepperProps> = ({
   const { active, setActive } = useBlogStepper();
 
   return (
-    <Stepper active={active} onStepClick={setActive}>
+    <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
       <Stepper.Step
         label="Enter Details"
         description="Required Blog author details"
