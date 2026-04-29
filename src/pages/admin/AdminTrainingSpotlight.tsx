@@ -60,7 +60,7 @@ export type AdminTrainingDetails = {
     institutionName: string;
     mobile: string;
     email: string;
-    address: AddressType;
+    address: AddressType | null;
   };
   enrolments: {
     id: string;
@@ -349,14 +349,20 @@ export default function AdminTrainingSpotlight() {
                       Address
                     </Text>
                     <Text size="sm" fw={500} className="text-gray-900">
-                      {training.instructor.address.addressLine1}
-                      {training.instructor.address.addressLine2 && (
-                        <>, {training.instructor.address.addressLine2}</>
+                      {training.instructor.address ? (
+                        <>
+                          {training.instructor.address.addressLine1}
+                          {training.instructor.address.addressLine2 && (
+                            <>, {training.instructor.address.addressLine2}</>
+                          )}
+                          <br />
+                          {training.instructor.address.city},{" "}
+                          {training.instructor.address.state} -{" "}
+                          {training.instructor.address.pincode}
+                        </>
+                      ) : (
+                        "Address not provided"
                       )}
-                      <br />
-                      {training.instructor.address.city},{" "}
-                      {training.instructor.address.state} -{" "}
-                      {training.instructor.address.pincode}
                     </Text>
                   </div>
                 </div>

@@ -100,10 +100,10 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ErrorBoundary>
-      <NuqsAdapter>
-        <QueryClientProvider client={queryClient}>
-          <MantineProvider theme={theme}>
+    <MantineProvider theme={theme}>
+      <ErrorBoundary>
+        <NuqsAdapter>
+          <QueryClientProvider client={queryClient}>
             <Routes>
               <Route path="/" element={<AppLayout />}>
                 <Route index element={<Home />} />
@@ -246,17 +246,17 @@ function App() {
                 </Route>
               </Route>
             </Routes>
-          </MantineProvider>
-          <ToastContainer
-            transition={Slide}
-            hideProgressBar
-            autoClose={6000}
-            position="bottom-right"
-          />
-          <ReactQueryDevtools />
-        </QueryClientProvider>
-      </NuqsAdapter>
-    </ErrorBoundary>
+            <ToastContainer
+              transition={Slide}
+              hideProgressBar
+              autoClose={6000}
+              position="bottom-right"
+            />
+            <ReactQueryDevtools />
+          </QueryClientProvider>
+        </NuqsAdapter>
+      </ErrorBoundary>
+    </MantineProvider>
   );
 }
 
