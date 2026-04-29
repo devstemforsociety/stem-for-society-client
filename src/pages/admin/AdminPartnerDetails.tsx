@@ -108,6 +108,7 @@ function AdminPartnerDetails() {
   }
 
   const partner = data?.data;
+  const address = partner?.address ?? null;
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
@@ -199,14 +200,18 @@ function AdminPartnerDetails() {
               <div>
                 <Text size="xs" c="dimmed">Address</Text>
                 <Text size="sm" fw={500} className="text-gray-900">
-                  {partner?.address.addressLine1}
-                  {partner?.address.addressLine2 && (
-                    <>, {partner.address.addressLine2}</>
+                  {address ? (
+                    <>
+                      {address.addressLine1 || "Address not provided"}
+                      {address.addressLine2 ? <>, {address.addressLine2}</> : null}
+                      <br />
+                      {address.city}, {address.state}
+                      <br />
+                      {address.pincode}
+                    </>
+                  ) : (
+                    "Address not provided"
                   )}
-                  <br />
-                  {partner?.address.city}, {partner?.address.state}
-                  <br />
-                  {partner?.address.pincode}
                 </Text>
               </div>
               {partner?.topics && partner.topics.length > 0 && (
