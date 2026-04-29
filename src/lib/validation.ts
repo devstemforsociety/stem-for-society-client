@@ -44,6 +44,75 @@ export const isValidGst = (gst: string) => VALIDATION_REGEX.GST.test(gst);
 
 export const isValidComplexPassword = (password: string) => VALIDATION_REGEX.COMPLEX_PASSWORD.test(password);
 
+export const isValidLinkedInUrl = (value: string) => {
+  if (!value) return false;
+  const trimmed = value.trim();
+  const urlPattern = /^(https?:\/\/)?(www\.)?linkedin\.com\/(in|company)\/[a-z0-9_%\-]{3,100}\/?(\?.*)?$/i;
+  return urlPattern.test(trimmed);
+};
+
+export const isValidDateOfBirth = (value: string | Date | null) => {
+  if (!value) return false;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+
+  const today = new Date();
+  let age = today.getFullYear() - date.getFullYear();
+  const monthDiff = today.getMonth() - date.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+    age -= 1;
+  }
+
+  return age >= 16 && age <= 50;
+};
+
+export const validateCampusAmbassadorStep = (step: number, data: any) => {
+  const errors: string[] = [];
+
+  if (step === 1) {
+    const firstName = (data.firstName || "").trim();
+    const lastName = (data.lastName || "").trim();
+    if (!firstName) errors.push("First name is required");
+    if (firstName && (firstName.length < 2 || firstName.length > 50)) {
+      errors.push("First name must be between 2 and 50 characters");
+    }
+    if (!lastName) errors.push("Last name is required");
+    if (lastName && (lastName.length < 2 || lastName.length > 50)) {
+      errors.push("Last name must be between 2 and 50 characters");
+    }
+    if (!data.educationLevel) errors.push("Education level is required");
+    if (!data.department) errors.push("Department is required");
+    if (!data.dateOfBirth) {
+      errors.push("Date of birth is required");
+    } else if (!isValidDateOfBirth(data.dateOfBirth)) {
+      errors.push("Date of birth must be between ages 16 and 50");
+    }
+    if (!data.currentYear) errors.push("Current year is required");
+    if (!data.linkedinProfile) {
+      errors.push("LinkedIn profile is required");
+    } else if (!isValidLinkedInUrl(data.linkedinProfile)) {
+      errors.push("LinkedIn profile must be a valid LinkedIn URL");
+    }
+  } else if (step === 2) {
+    if (!data.email) errors.push("Email is required");
+    if (data.email && !isValidEmail(data.email)) errors.push("Invalid email format");
+    if (!data.mobileNumber) errors.push("Mobile number is required");
+    if (data.mobileNumber && !isValidPhone(data.mobileNumber)) {
+      errors.push("Invalid mobile number (Starts with 6-9, 10 digits)");
+    }
+    if (!data.emailVerified) errors.push("Please complete email verification");
+    if (!data.otpVerified) errors.push("Please complete OTP verification");
+  } else if (step === 3) {
+    const hasInstitution =
+      (data.institutionName && data.institutionName !== "other") ||
+      (data.manualInstitutionName && data.manualInstitutionName.trim());
+    if (!hasInstitution) errors.push("Please select or enter your institution name");
+    if (!data.city) errors.push("City is required");
+  }
+
+  return errors;
+};
+
 /**
  * Validates partner/institution details
  */

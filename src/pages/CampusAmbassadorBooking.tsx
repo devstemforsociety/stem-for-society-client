@@ -12,8 +12,7 @@ import { api } from "../lib/api";
 import { mutationErrorHandler } from "../lib/utils";
 import { GenericError, GenericResponse } from "../lib/types";
 import { 
-  isValidEmail, 
-  isValidPhone 
+  validateCampusAmbassadorStep 
 } from '../lib/validation';
 
 // Backend types from CampusAmbassador.tsx
@@ -163,44 +162,17 @@ const CampusAmbassadorBooking = () => {
   };
 
   const validateStep = (step: number) => {
-    switch (step) {
-      case 1:
-        if (!formData.firstName || !formData.educationLevel || !formData.department || !formData.dateOfBirth || !formData.currentYear || !formData.linkedinProfile) {
-          toast.error("Please fill all required fields");
-          return false;
-        }
-        break;
-      case 2:
-        if (!formData.email || !formData.mobileNumber) {
-          toast.error("Please fill all required fields");
-          return false;
-        }
-        if (!isValidEmail(formData.email)) {
-          toast.error("Please enter a valid email address");
-          return false;
-        }
-        if (!isValidPhone(formData.mobileNumber)) {
-          toast.error("Invalid mobile number (Starts with 6-9, 10 digits)");
-          return false;
-        }
-        if (!emailVerified || !otpVerified) {
-          toast.error("Please complete email verification and OTP verification");
-          return false;
-        }
-        break;
-      case 3:
-        if (!formData.institutionName && !formData.manualInstitutionName) {
-          toast.error("Please select or enter your institution name");
-          return false;
-        }
-        if (!formData.city) {
-          toast.error("Please select your city");
-          return false;
-        }
-        break;
-      default:
-        return true;
+    const errors = validateCampusAmbassadorStep(step, {
+      ...formData,
+      emailVerified,
+      otpVerified,
+    });
+
+    if (errors.length > 0) {
+      toast.error(errors[0]);
+      return false;
     }
+
     return true;
   };
 
@@ -304,10 +276,11 @@ const CampusAmbassadorBooking = () => {
           required
         />
         <Input
-          placeholder="Last Name"
+          placeholder="Last Name *"
           value={formData.lastName}
           onChange={(e) => handleInputChange('lastName', e.target.value)}
           className="h-12 bg-gray-100 border-0 placeholder:text-gray-500"
+          required
         />
       </div>
 
