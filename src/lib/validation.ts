@@ -100,7 +100,6 @@ export const validateCampusAmbassadorStep = (step: number, data: any) => {
     if (data.mobileNumber && !isValidPhone(data.mobileNumber)) {
       errors.push("Invalid mobile number (Starts with 6-9, 10 digits)");
     }
-    if (!data.emailVerified) errors.push("Please complete email verification");
     if (!data.otpVerified) errors.push("Please complete OTP verification");
   } else if (step === 3) {
     const hasInstitution =

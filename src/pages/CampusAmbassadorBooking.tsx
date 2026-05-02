@@ -118,9 +118,9 @@ const CampusAmbassadorBooking = () => {
     state: ''
   });
 
-  const [emailVerified, setEmailVerified] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   const { isPending, mutate } = useCampusAmbSignUp();
 
@@ -164,7 +164,6 @@ const CampusAmbassadorBooking = () => {
   const validateStep = (step: number) => {
     const errors = validateCampusAmbassadorStep(step, {
       ...formData,
-      emailVerified,
       otpVerified,
     });
 
@@ -206,31 +205,47 @@ const CampusAmbassadorBooking = () => {
     mutate(backendData);
   };
 
-  const handleSendOtp = () => {
-    if (!formData.mobileNumber) {
-      toast.error("Please enter your mobile number");
-      return;
-    }
-    setOtpSent(true);
-    toast.success("OTP sent to your mobile number");
-  };
-
-  const handleVerifyOtp = () => {
-    if (!formData.otp) {
-      toast.error("Please enter the OTP");
-      return;
-    }
-    setOtpVerified(true);
-    toast.success("Mobile number verified successfully");
-  };
-
-  const handleEmailAuth = () => {
+  const handleSendOtp = async () => {
     if (!formData.email) {
       toast.error("Please enter your email address");
       return;
     }
-    setEmailVerified(true);
-    toast.success("Email verified successfully");
+
+    try {
+      await api().post("/email/sendOTP", {
+        email: formData.email,
+        mobile: formData.mobileNumber,
+        institutionName:
+          formData.institutionName ||
+          formData.manualInstitutionName ||
+          formData.collegeName,
+      });
+      setOtpSent(true);
+      toast.success("OTP sent to your email address");
+    } catch (err) {
+      mutationErrorHandler(err as AxiosError<GenericError>);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!formData.otp) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+
+    try {
+      setIsVerifyingOtp(true);
+      await api().post("/email/verifyOTP", {
+        email: formData.email,
+        otp: formData.otp,
+      });
+      setOtpVerified(true);
+      toast.success("Email verified successfully");
+    } catch (err) {
+      mutationErrorHandler(err as AxiosError<GenericError>);
+    } finally {
+      setIsVerifyingOtp(false);
+    }
   };
 
   const stepTitles = [
@@ -359,7 +374,7 @@ const CampusAmbassadorBooking = () => {
           className="h-12 bg-gray-100 border-0 placeholder:text-gray-500 pr-12"
           required
         />
-        {emailVerified && (
+        {otpVerified && (
           <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
         )}
       </div>
@@ -368,47 +383,7 @@ const CampusAmbassadorBooking = () => {
         <div className="flex items-center space-x-3">
           <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
           <span className="text-yellow-800 text-sm">
-            {emailVerified ? 'Email verified successfully!' : 'Check your inbox and click the verification link.'}
-          </span>
-        </div>
-        <Button 
-          className={`px-6 ${emailVerified ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
-          onClick={handleEmailAuth}
-          disabled={emailVerified}
-        >
-          {emailVerified ? 'Verified' : 'Authenticate'}
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Select onValueChange={(value) => handleInputChange('country', value)}>
-          <SelectTrigger className="h-12 bg-gray-100 border-0 text-gray-500">
-            <SelectValue placeholder="Country" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="in">India</SelectItem>
-            <SelectItem value="us">United States</SelectItem>
-            <SelectItem value="uk">United Kingdom</SelectItem>
-            <SelectItem value="ca">Canada</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <div className="md:col-span-2">
-          <Input
-            placeholder="Mobile Number *"
-            value={formData.mobileNumber}
-            onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
-            className="h-12 bg-gray-100 border-0 placeholder:text-gray-500"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
-          <span className="text-yellow-800 text-sm">
-            {otpVerified ? 'Mobile number verified!' : 'Enter the OTP sent to your mobile number.'}
+            {otpVerified ? 'Email verified!' : 'Send an OTP to verify your email address.'}
           </span>
         </div>
         <Button 
@@ -422,7 +397,7 @@ const CampusAmbassadorBooking = () => {
 
       <div className="flex gap-4">
         <Input
-          placeholder="Enter OTP *"
+          placeholder="Enter Email OTP *"
           value={formData.otp}
           onChange={(e) => handleInputChange('otp', e.target.value)}
           className="h-12 bg-gray-100 border-0 placeholder:text-gray-500 flex-1"
@@ -431,10 +406,20 @@ const CampusAmbassadorBooking = () => {
         <Button 
           className={`px-6 ${otpVerified ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
           onClick={handleVerifyOtp}
-          disabled={!otpSent || otpVerified}
+          disabled={!otpSent || otpVerified || isVerifyingOtp}
         >
-          {otpVerified ? 'Verified' : 'Verify'}
+          {otpVerified ? 'Verified' : isVerifyingOtp ? 'Verifying...' : 'Verify'}
         </Button>
+      </div>
+
+      <div>
+        <Input
+          placeholder="Mobile Number *"
+          value={formData.mobileNumber}
+          onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
+          className="h-12 bg-gray-100 border-0 placeholder:text-gray-500"
+          required
+        />
       </div>
     </div>
   );
